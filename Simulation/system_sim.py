@@ -6,7 +6,10 @@ import matplotlib.pyplot as plt
 from  matplotlib import animation
 from math import sin, cos, pi
 
+from render import SimplePendulumCartRenderer, DoublePendulumCartRender
 import sys
+
+
 G = 9.81
 
 #mass of cart/pendulum, length of pendulum
@@ -24,19 +27,7 @@ d3 = 0.1
 sim_length = 30 #seconds 
 frame_rate = 25 
 
-def print_progress_bar(iteration, total, prefix='Progress:', suffix='Complete', length=50, fill='█'):
 
-    percent_str = f"{100 * (iteration / float(total)):.1f}"
-    percent_val = float(percent_str)
-    
-    filled_length = int(length * iteration // total)
-    
-    bar = fill * filled_length + '-' * (length - filled_length)
-
-    print(f'\r{prefix} |{bar}| {percent_str}% {suffix}', end='', flush=True)
-    
-    if iteration == total:
-        print()
 
 
 def system_dynamics(t, Y):
@@ -64,63 +55,14 @@ def system_dynamics(t, Y):
 
     return [dx, y[0][0], dt1, y[0][1], dt2, y[0][2]]
 
-Y0 = [0,0,3*pi/4,0,0,0]
+Y0 = [0,0,-0.3,0.6,0,0]
 t_span = [0, sim_length]
 t_eval = np.linspace(t_span[0], t_span[1], sim_length*100)
 sol = solve_ivp(system_dynamics, t_span, Y0, t_eval=t_eval)
-
-
-def draw_system_state():
-    fig, ax = plt.subplots()
-    pendulum1, = ax.plot([], [], 'b-', lw=3)
-    pendulum2, = ax.plot([], [], 'b-', lw=3)
-    ball1, = ax.plot([], [], 'ro', markersize=9)
-    ball2, = ax.plot([], [], 'ro', markersize=9)
-
-    ax.set_title("Double Inverted Pendulum")
-    frame_size = l1*3
-    ax.set_xlim(-1*frame_size, frame_size)
-    ax.set_ylim(-1*frame_size, frame_size)
-    ax.set_aspect('equal')
-
-    def init():
-        pendulum1.set_data([], [])
-        pendulum2.set_data([], [])
-        ball1.set_data([], [])
-        ball2.set_data([], [])
-        return pendulum1, pendulum2,  ball1, ball2
-
-    def animate(i):
-        print_progress_bar(i,sim_length*frame_rate-1)
-        index = i*sim_length*100 // (sim_length * frame_rate) 
-
-        x, theta1, theta2 = sol.y[0][i], sol.y[2][i], sol.y[4][i]
-        dx, dt1, dt2 = sol.y[1][i], sol.y[3][i], sol.y[5][i]
-
-        potential = 0
-        cart_k = 1/2*m1*(dx**2)
-
-        x_points1 = [x, l1 * sin(theta1)+x]
-        y_points1 = [0, l1 * cos(theta1)]
-        x_points2 = [x_points1[1], x_points1[1] + l2 * sin(theta2)]
-        y_points2 = [y_points1[1], y_points1[1] + l2 * cos(theta2)]
-
-        pendulum1.set_data(x_points1, y_points1)
-        pendulum2.set_data(x_points2, y_points2)
-        ball1.set_data([x_points1[-1]], [y_points1[-1]])
-        ball2.set_data([x_points2[-1]], [y_points2[-1]])
-
-        return pendulum1,pendulum2, ball1, ball2
-        
-
-    ani = animation.FuncAnimation(fig,animate, frames=sim_length*frame_rate, init_func=init, interval=1000/frame_rate, blit=True)
-    ani.save('pendulum.gif', writer='pillow', fps=25)
-
-
+   
 if __name__ == "__main__":
 
-    print(sol.t.shape)
-    print(sol.status)
+
 
     plt.figure(figsize=(12, 5))
     plt.subplot(1, 2, 1)
@@ -146,7 +88,8 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
 
-    draw_system_state()
+    rend = DoublePendulumCartRender(sim_length,frame_rate,[m1,m2,m3], [l1,l2])
+    rend.draw_cart_double_pendulum(sol)
         
 
 
