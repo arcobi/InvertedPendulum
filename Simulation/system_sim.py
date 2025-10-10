@@ -57,7 +57,8 @@ def draw_system_state():
     fig, ax = plt.subplots()
     pendulum1, = ax.plot([], [], 'b-', lw=3)
     pendulum2, = ax.plot([], [], 'b-', lw=3)
-    ball, = ax.plot([], [], 'ro', markersize=12)
+    ball1, = ax.plot([], [], 'ro', markersize=9)
+    ball2, = ax.plot([], [], 'ro', markersize=9)
 
     ax.set_title("Single Pendulum")
     frame_size = l1*3
@@ -68,8 +69,9 @@ def draw_system_state():
     def init():
         pendulum1.set_data([], [])
         pendulum2.set_data([], [])
-        ball.set_data([], [])
-        return pendulum1, pendulum2,  ball
+        ball1.set_data([], [])
+        ball2.set_data([], [])
+        return pendulum1, pendulum2,  ball1, ball2
 
     def animate(i):
         index = i*50000 // (2500 * 100)
@@ -83,9 +85,10 @@ def draw_system_state():
 
         pendulum1.set_data(x_points1, y_points1)
         pendulum2.set_data(x_points2, y_points2)
-        ball.set_data([x_points1[-1]], [y_points1[-1]])
+        ball1.set_data([x_points1[-1]], [y_points1[-1]])
+        ball2.set_data([x_points2[-1]], [y_points2[-1]])
 
-        return pendulum1,pendulum2, ball
+        return pendulum1,pendulum2, ball1, ball2
         
 
     ani = animation.FuncAnimation(fig,animate, frames=2500, init_func=init, interval=10, blit=True)
